@@ -4,7 +4,7 @@ workflows:
     environment:
       flutter: stable
       android_signing:
-        - realese.keystore
+        - relaese.keystore
     scripts:
       - flutter clean
       - flutter pub get
