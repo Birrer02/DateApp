@@ -1,0 +1,11 @@
+workflows:
+  android-workflow:
+    name: Android Build
+    environment:
+      flutter: stable
+      android_signing:
+        - release_keystore
+    scripts:
+      - flutter clean
+      - flutter pub get
+      - flutter build apk --release
