@@ -1,18 +1,31 @@
 workflows:
-  android-workflow:
+  android-release:
     name: Android Release Build
-    max_build_duration: 120
     environment:
-      flutter: stable
+      groups:
+        - google_play # Erstelle eine Gruppe mit deinen Google Play Anmeldedaten in Codemagic
       android_signing:
-        - release_keystore  # Stelle sicher, dass dies mit deiner Keystore-Referenz übereinstimmt
+        keystore: "keystore.jks" # Pfad zu deinem Keystore
+        keystore_password: $CM_KEYSTORE_PASSWORD # Umgebungsvariable für Keystore-Passwort
+        key_alias: "your_key_alias" # Dein Key-Alias
+        key_password: $CM_KEY_PASSWORD # Umgebungsvariable für Key-Passwort
     scripts:
-      - flutter clean
-      - flutter pub get
-      - flutter build apk --release
+      - name: Set up keystore
+        script: |
+          echo $CM_KEYSTORE_BASE64 | base64 --decode > android/app/keystore.jks
+      - name: Set up keystore properties
+        script: |
+          echo "storePassword=$CM_KEYSTORE_PASSWORD" > android/keystore.properties
+          echo "keyPassword=$CM_KEY_PASSWORD" >> android/keystore.properties
+          echo "keyAlias=your_key_alias" >> android/keystore.properties
+      - name: Flutter build
+        script: |
+          flutter build appbundle --release
     artifacts:
-      - build/app/outputs/flutter-apk/app-release.apk
+      - build/app/outputs/bundle/release/app-release.aab
     publishing:
-      email:
-        recipients:
-    
+      google_play:
+        credentials: $GOOGLE_PLAY_JSON_KEY_FILE # Umgebungsvariable für Google Play JSON-Key-File
+        package_name: com.example.myapplication # Dein Package-Name
+        track: alpha # Oder beta, production
+        promote_to: production
